@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - ShoppingHub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<header>
+    <div class="logo">
+        Shopping<span>Hub</span>
+    </div>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/products">Products</a>
+        <a href="/cart">Cart</a>
+        <a href="/admin/login">Admin</a>
+    </nav>
+</header>
+
+<main class="products-page">
+
+    <h1>Available Products</h1>
+
+    <form action="/add-to-cart" method="POST">
+
+        <div class="product-container">
+
+            {% for product in products %}
+
+            <div class="product-card">
+
+                <h2>{{ product[1] }}</h2>
+
+                <p class="category">{{ product[2] }}</p>
+
+                <p class="price">₹{{ product[3] }}</p>
+
+                <p>Unit: {{ product[5] }}</p>
+
+                <p>Stock: {{ product[4] }}</p>
+
+                <div style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between;">
+                    <label style="cursor: pointer; font-weight: bold;">
+                        <input type="checkbox" name="product_ids" value="{{ product[0] }}" style="width: auto; margin-right: 5px;">
+                        Select
+                    </label>
+
+                    <input
+                        type="number"
+                        name="quantity_{{ product[0] }}"
+                        value="1"
+                        min="1"
+                        max="{{ product[4] }}"
+                        style="width: 70px; padding: 5px;"
+                    >
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <button type="submit" class="btn" style="padding: 15px 40px; font-size: 18px;">
+                🛒 Add Selected Items to Cart
+            </button>
+        </div>
+
+    </form>
+
+</main>
+
+<footer>
+    <p>© 2026 ShoppingHub</p>
+</footer>
+
+</body>
+</html>

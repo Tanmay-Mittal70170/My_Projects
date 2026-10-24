@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - ShoppingHub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .admin-section { margin-bottom: 40px; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 15px; }
+        .form-grid input { padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 100%; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        Shopping<span>Hub</span> (Admin)
+    </div>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/products">Products View</a>
+        <a href="/admin/logout" style="color: #ef4444;">Logout</a>
+    </nav>
+</header>
+
+<main class="cart-page">
+    <h1>Welcome, {{ username }}! 👋</h1>
+
+    <!-- 1. ADD NEW PRODUCT SECTION -->
+    <section class="admin-section">
+        <h2>➕ Add New Product</h2>
+        <form action="/admin/add-product" method="POST">
+            <div class="form-grid">
+                <input type="text" name="name" placeholder="Product Name" required>
+                <input type="text" name="category" placeholder="Category" required>
+                <input type="number" step="0.01" name="price" placeholder="Price (₹)" required>
+                <input type="text" name="product_unit" placeholder="Unit (e.g. kg, pcs)" required>
+                <input type="number" name="stock_quantity" placeholder="Stock Qty" required>
+            </div>
+            <button type="submit" class="btn" style="margin-top: 15px;">Add Product</button>
+        </form>
+    </section>
+
+    <!-- 2. PRODUCT MANAGEMENT TABLE -->
+    <!-- 2. PRODUCT MANAGEMENT TABLE -->
+    <section class="admin-section">
+        <h2>📦 Inventory Management</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Unit</th>
+                    <th>Current Stock</th>
+                    <th>Add Stock</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product[0] }}</td>
+                    <td>{{ product[1] }}</td>
+                    <td>{{ product[2] }}</td>
+                    <td>₹{{ product[3] }}</td>
+                    <td>{{ product[5] }}</td>
+                    <td><strong>{{ product[4] }}</strong></td>
+                    <td>
+                        <!-- QUICK ADD STOCK FORM -->
+                        <form action="/admin/add-stock/{{ product[0] }}" method="POST" style="display: flex; gap: 5px; align-items: center;">
+                            <input 
+                                type="number" 
+                                name="added_stock" 
+                                min="1" 
+                                placeholder="+ Qty" 
+                                required 
+                                style="width: 75px; padding: 5px; border: 1px solid #ccc; border-radius: 4px;"
+                            >
+                            <button type="submit" class="btn" style="padding: 5px 10px; font-size: 13px; background-color: #10b981;">+ Add</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form action="/admin/delete-product/{{ product[0] }}" method="POST" onsubmit="return confirm('Delete this product?');">
+                            <button class="delete-btn">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+    <!-- 3. VIEW ORDERS SECTION -->
+   <!-- 3. VIEW & SEARCH ORDERS SECTION -->
+    <section class="admin-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+            <h2 style="margin: 0;">🧾 Customer Orders History</h2>
+            
+            <!-- CUSTOMER SEARCH FORM -->
+            <form action="/admin/dashboard" method="GET" style="display: flex; gap: 10px; align-items: center;">
+                <input 
+                    type="text" 
+                    name="search" 
+                    placeholder="Search by Name, Mobile, or ID..." 
+                    value="{{ search_query }}"
+                    style="padding: 8px 12px; border: 1px solid #ccc; border-radius: 5px; width: 250px;"
+                >
+                <button type="submit" class="btn" style="padding: 8px 15px;">🔍 Search</button>
+                {% if search_query %}
+                    <a href="/admin/dashboard" style="color: #ef4444; text-decoration: none; font-size: 14px;">Clear Search</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer Name</th>
+                    <th>Mobile</th>
+                    <th>Total Price</th>
+                    <th>Order Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if orders %}
+                    {% for order in orders %}
+                    <tr>
+                        <td>#{{ order[0] }}</td>
+                        <td>{{ order[1] }}</td>
+                        <td>{{ order[2] }}</td>
+                        <td>₹{{ order[3] }}</td>
+                        <td>{{ order[4] }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #888; padding: 20px;">
+                            No customer orders found{% if search_query %} matching "{{ search_query }}"{% endif %}.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </section>
+</main>
+
+</body>
+</html>

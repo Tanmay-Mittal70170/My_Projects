@@ -1,0 +1,15 @@
+Question 4. What happens when this code runs?
+
+
+score = 10
+
+def update_score():
+    score = score + 5
+    print(score)
+    
+update_score()
+
+A. Prints 15
+B. Prints 10
+C. UnboundLocalError
+D. Prints 5

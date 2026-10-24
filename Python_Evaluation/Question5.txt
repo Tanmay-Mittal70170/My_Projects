@@ -1,0 +1,10 @@
+What is the output of this code?
+for i in range(3):
+    pass
+
+print(i)
+
+A. 0
+B. 2
+C. 3
+D. NameError: name 'i' is not defined

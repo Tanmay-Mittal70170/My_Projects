@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>Shopping Management System</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+
+</head>
+
+<body>
+
+
+<header>
+    <div class="logo">
+        Shopping<span>Hub</span>
+    </div>
+
+    <nav>
+        <a href="/">Home</a>
+        <a href="/products">Products</a>
+        <a href="/cart">Cart</a>
+        <a href="/admin/login">Admin</a>
+    </nav>
+</header>
+
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <h1>Welcome to ShoppingHub</h1>
+
+        <p>
+            A simple and secure Shopping Management System
+            for managing products, orders and customers.
+        </p>
+
+        <div class="hero-buttons">
+            <a href="/products" class="btn">Shop Now</a>
+            <a href="/admin/login" class="btn secondary-btn">
+                Admin Login
+            </a>
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="features">
+
+    <h2>Our Features</h2>
+
+    <div class="feature-container">
+
+        <div class="feature-card">
+            <h3>🛒 Shopping Cart</h3>
+            <p>
+                Add products to your cart and manage quantities
+                before checkout.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <h3>📦 Product Management</h3>
+            <p>
+                Admin can add, update and delete products
+                from the inventory.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <h3>🧾 Easy Checkout</h3>
+            <p>
+                Calculate GST, discounts and generate
+                the final bill.
+            </p>
+        </div>
+
+        <div class="feature-card">
+            <h3>📋 Order History</h3>
+            <p>
+                Customers and admins can view previous
+                orders and their details.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<footer>
+
+    <p>
+        © 2026 ShoppingHub | Shopping Management System
+    </p>
+
+</footer>
+
+
+</body>
+</html>

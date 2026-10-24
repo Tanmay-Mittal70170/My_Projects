@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Checkout</title>
+
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}">
+
+
+</head>
+
+<body>
+
+<header>
+
+
+<div class="logo">
+    Shopping<span>Hub</span>
+</div>
+
+<nav>
+    <a href="/">Home</a>
+    <a href="/products">Products</a>
+    <a href="/cart">Cart</a>
+</nav>
+
+
+</header>
+
+<main class="checkout-page">
+
+
+<div class="checkout-box">
+
+    <h1>Checkout</h1>
+
+    <form action="/checkout" method="POST">
+
+        <label>Customer Name</label>
+
+        <input
+            type="text"
+            name="customer_name"
+            placeholder="Enter your name"
+            required
+        >
+
+
+        <label>Mobile Number</label>
+
+        <input
+            type="tel"
+            name="customer_mobile"
+            placeholder="Enter mobile number"
+            required
+        >
+
+
+        <div class="bill">
+
+            <p>
+                Subtotal:
+                <span>₹{{ total }}</span>
+            </p>
+
+            <p>
+                GST (18%):
+                <span>₹{{ gst }}</span>
+            </p>
+
+            <p>
+                Discount (10%):
+                <span>₹{{ discount }}</span>
+            </p>
+
+            <hr>
+
+            <h2>
+                Final Total:
+                <span>₹{{ final_total }}</span>
+            </h2>
+
+        </div>
+
+
+        <button type="submit" class="btn">
+            Confirm Checkout
+        </button>
+
+    </form>
+
+</div>
+
+
+</main>
+
+</body>
+</html>

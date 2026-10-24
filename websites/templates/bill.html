@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Bill - ShoppingHub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        Shopping<span>Hub</span>
+    </div>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/products">Products</a>
+    </nav>
+</header>
+
+<main class="checkout-page">
+    <div class="checkout-box" style="width: 550px;">
+        <h1 style="margin-bottom: 10px;">RECEIPT / BILL</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 20px;">Shopping Management System</p>
+        
+        <div style="background: #f9fafb; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+            <p><strong>Order ID:</strong> #{{ order_id }}</p>
+            <p><strong>Customer Name:</strong> {{ customer_name }}</p>
+            <p><strong>Mobile:</strong> {{ customer_mobile }}</p>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>₹{{ item.price }}</td>
+                    <td>₹{{ item.price * item.quantity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="bill">
+            <p>Subtotal: <span>₹{{ subtotal }}</span></p>
+            <p>GST (18%): <span>₹{{ gst }}</span></p>
+            <p>Discount (10%): <span>₹{{ discount }}</span></p>
+            <hr>
+            <h2>Total Amount Payable: <span>₹{{ final_total }}</span></h2>
+        </div>
+
+        <p style="text-align: center; font-weight: bold; margin-top: 15px;">Thank you for shopping with us!</p>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button onclick="window.print()" class="btn" style="flex: 1;">Print Bill</button>
+            <a href="/" class="btn secondary-btn" style="flex: 1; text-align: center;">Home</a>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

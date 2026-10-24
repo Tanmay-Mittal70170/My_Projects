@@ -1,0 +1,14 @@
+What does this function print?
+def find_even():
+    for num in [1, 2, 3, 4]:
+        if num % 2 == 0:
+            return num
+    return 0
+    
+print(find_even())
+
+A. 2
+B. 2, 4
+C. 4
+D. 0
+

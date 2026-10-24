@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Shopping Cart</title>
+
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}">
+
+
+</head>
+
+<body>
+
+<header>
+
+
+<div class="logo">
+    Shopping<span>Hub</span>
+</div>
+
+<nav>
+    <a href="/">Home</a>
+    <a href="/products">Products</a>
+    <a href="/cart">Cart</a>
+</nav>
+
+
+</header>
+
+<main class="cart-page">
+
+
+<h1>Your Shopping Cart</h1>
+
+{% if cart %}
+
+<table>
+
+    <thead>
+
+        <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Action</th>
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        {% for item in cart %}
+
+        <tr>
+
+            <td>{{ item.name }}</td>
+
+            <td>₹{{ item.price }}</td>
+
+            <td>{{ item.quantity }}</td>
+
+            <td>
+                ₹{{ item.price * item.quantity }}
+            </td>
+
+            <td>
+
+                <form action="/remove-from-cart"
+                      method="POST">
+
+                    <input
+                        type="hidden"
+                        name="product_id"
+                        value="{{ item.product_id }}"
+                    >
+
+                    <button class="delete-btn">
+                        Remove
+                    </button>
+
+                </form>
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+
+<div class="cart-summary">
+
+    <h2>
+        Total: ₹{{ total }}
+    </h2>
+
+    <a href="/checkout" class="btn">
+        Proceed to Checkout
+    </a>
+
+</div>
+
+{% else %}
+
+<div class="empty-cart">
+
+    <h2>Your cart is empty</h2>
+
+    <a href="/products" class="btn">
+        Continue Shopping
+    </a>
+
+</div>
+
+{% endif %}
+
+
+</main>
+
+</body>
+</html>
