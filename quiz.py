@@ -9,6 +9,18 @@ teams = [
     "Team 6", "Team 7", "Team 8", "Team 9", "Team 10"
 ]
 
+# isme questions ke answers set krlena abhi random krre h
+correct_answers = {
+    1:"A",
+    2:"B",
+    3:"C",
+    4:"D",
+    5:"C",
+    6:"B"
+}
+
+num_teams = len(teams)
+
 # enumerate automatically counts your teams. 'i' becomes 1, 2, 3...
 for i, team_name in enumerate(teams, start=1):
     print("\n" + "-" * 80)
@@ -19,8 +31,33 @@ for i, team_name in enumerate(teams, start=1):
         # It looks for Question1.txt for the 1st team, Question2.txt for the 2nd, etc.
         with open(f"Question{i}.txt", "r") as file:
             print(file.read())
-            
-        input(f"\n{team_name}, press Enter to lock in your answer...")
+
+        current_idx = i-1
+        correct_ans = correct_answers.get(i, "").upper()
+        attempts = 0
+        resolved = False 
+
+        while attempts < num_teams and not resolved:
+            active_team = teams[current_idx]
+            user_input = input(f"\n{active_team}, enter option (A/B/C/D) or 'P' to Pass: ").strip().upper()
+
+            if user_input == "P":
+                print(f"{active_team} passes the question !")
+                current_idx = (current_idx + 1) % num_teams
+                attempts +=1
+                if attempts < num_teams:
+                    print(f"Passes to {teams[current_idx].upper()}")
+            elif user_input in ["A","B","C","D"]:
+                if user_input == correct_ans:
+                    print(f"correct answer by {active_team}!")
+                else:
+                    print("Wrong Answer! uhhh ohhh !")
+                resolved = True
+            else:
+                print("Invalid input! please enter A, B, C, D or P.")
+        if not resolved:
+            print(f"\nAll teams passed. Correct answer was: {correct_ans}")
+
         
     except FileNotFoundError:
         print(f"[Error] Missing 'Question{i}.txt' in this folder.")
