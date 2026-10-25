@@ -27,3 +27,4 @@ for i, team_name in enumerate(teams, start=1):
 
 print("\n" + "-" * 80)
 print("QUIZ COMPLETE!")
+
