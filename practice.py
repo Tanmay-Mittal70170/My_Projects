@@ -1,5 +1,1 @@
-grades={"Math":85, "Physics":92}
-
-score=grades.update({"Chemistry":78}).get("Chemistry")
-
-print(score)
+print(0.2+0.1==0.3)

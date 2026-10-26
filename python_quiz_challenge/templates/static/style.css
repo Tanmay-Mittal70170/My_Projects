@@ -1,0 +1,348 @@
+/* =========================================================
+   FIXED MODERN PYTHON QUIZ UI (style.css)
+   ========================================================= */
+
+:root {
+    --py-blue: #3776AB;
+    --py-blue-glow: rgba(55, 118, 171, 0.4);
+    --py-yellow: #FFD43B;
+    --py-yellow-glow: rgba(255, 212, 59, 0.25);
+    --bg-dark: #090d16;
+    --panel-bg: #111622;
+    --terminal-bg: #070a0f;
+    --border-color: #21293a;
+    --text-primary: #e6edf3;
+    --text-muted: #8b949e;
+    --accent-green: #3fb950;
+    --accent-red: #f85149;
+    --accent-purple: #8957e5;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Consolas', 'Fira Code', 'Courier New', monospace;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    padding: 20px 24px 40px 24px;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* HEADER */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-left: 6px solid var(--py-blue);
+    border-right: 6px solid var(--py-yellow);
+    padding: 14px 24px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.logo {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--py-yellow);
+}
+
+.logo .kw {
+    color: var(--py-blue);
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.btn-sidebar-toggle {
+    background: var(--py-blue);
+    color: #fff;
+    border: 1px solid var(--py-yellow);
+    padding: 9px 16px;
+    border-radius: 7px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-sidebar-toggle:hover {
+    background: var(--py-yellow);
+    color: #000;
+}
+
+.btn-reset {
+    background: rgba(248, 81, 73, 0.15);
+    color: var(--accent-red);
+    border: 1px solid var(--accent-red);
+    padding: 9px 14px;
+    border-radius: 7px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-reset:hover {
+    background: var(--accent-red);
+    color: #fff;
+}
+
+/* MAIN PANEL - FIXED PADDING TO PREVENT CUTTING */
+.main-panel {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 24px 24px 32px 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    margin-bottom: 40px;
+}
+
+.terminal-header {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.dot { width: 12px; height: 12px; border-radius: 50%; }
+.dot.r { background: #ff5f56; }
+.dot.y { background: #ffbd2e; }
+.dot.g { background: #27c93f; }
+
+.filename-tab {
+    margin-left: 10px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* TURN BANNER */
+.turn-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(55, 118, 171, 0.12);
+    border: 1px solid var(--py-blue);
+    padding: 12px 18px;
+    border-radius: 8px;
+    margin-bottom: 18px;
+}
+
+.banner-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 3px;
+    letter-spacing: 0.5px;
+}
+
+.active-team-badge {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--py-yellow);
+}
+
+.primary-team-badge {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #58a6ff;
+    text-align: right;
+}
+
+/* QUESTION BOX */
+.question-box {
+    font-size: 1.15rem;
+    line-height: 1.55;
+    color: #ffffff;
+    background: var(--terminal-bg);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    border-left: 5px solid var(--py-yellow);
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+}
+
+/* MCQ GRID - FIXED SPACING AND ALIGNMENT */
+.mcq-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+@media (max-width: 850px) {
+    .mcq-grid { grid-template-columns: 1fr; }
+}
+
+.mcq-card {
+    background: var(--terminal-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    text-align: left;
+    color: var(--text-primary);
+    width: 100%;
+}
+
+.mcq-card:hover:not(.disabled) {
+    border-color: var(--py-yellow);
+    box-shadow: 0 0 12px var(--py-yellow-glow);
+    transform: translateY(-2px);
+}
+
+.mcq-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    border-bottom: 1px solid #1c2430;
+    padding-bottom: 6px;
+}
+
+.mcq-letter {
+    background: var(--py-blue);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 3px 10px;
+    border-radius: 5px;
+}
+
+.mcq-text {
+    font-family: 'Consolas', monospace;
+    font-size: 1rem;
+    line-height: 1.35;
+    white-space: pre;
+    margin: 0;
+    padding: 2px 0;
+    color: #ffffff;
+    overflow-x: auto;
+    width: 100%;
+}
+
+/* MCQ STATES */
+.mcq-card.wrong {
+    border-color: var(--accent-red);
+    background: rgba(248, 81, 73, 0.08);
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.mcq-card.wrong .mcq-letter { background: var(--accent-red); }
+
+.mcq-card.correct {
+    border-color: var(--accent-green);
+    background: rgba(63, 185, 80, 0.15);
+    box-shadow: 0 0 15px rgba(63, 185, 80, 0.3);
+}
+.mcq-card.correct .mcq-letter { background: var(--accent-green); color: #000; }
+
+/* CONTROLS */
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.btn {
+    padding: 11px 18px;
+    border: none;
+    border-radius: 7px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn:hover:not(:disabled) { transform: translateY(-2px); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn-prev { background: #21262d; color: var(--text-primary); border: 1px solid var(--border-color); }
+.btn-pass { background: var(--py-yellow); color: #05080c; }
+.btn-reveal { background: var(--accent-purple); color: #ffffff; }
+.btn-next { background: var(--py-blue); color: #ffffff; margin-left: auto; }
+
+/* REVEAL BOX */
+.reveal-box {
+    background: rgba(63, 185, 80, 0.1);
+    border: 1px solid var(--accent-green);
+    border-left: 5px solid var(--accent-green);
+    padding: 16px;
+    border-radius: 8px;
+    display: none;
+    margin-top: 16px;
+}
+
+.reveal-answer { font-size: 1.1rem; color: var(--accent-green); font-weight: 700; margin-bottom: 6px; }
+.reveal-explanation { color: var(--text-primary); font-size: 0.92rem; line-height: 1.45; }
+
+/* STATUS BAR */
+.status-bar {
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: var(--terminal-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: #58a6ff;
+    font-size: 0.88rem;
+}
+
+/* SIDEBAR DRAWER */
+.sidebar-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    opacity: 0; visibility: hidden; transition: 0.25s ease; z-index: 998;
+}
+.sidebar-overlay.open { opacity: 1; visibility: visible; }
+
+.sidebar-drawer {
+    position: fixed; top: 0; right: -400px; width: 360px; height: 100vh;
+    background: var(--panel-bg); border-left: 3px solid var(--py-blue);
+    padding: 22px; z-index: 999; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.7); overflow-y: auto;
+}
+.sidebar-drawer.open { right: 0; }
+
+.sidebar-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--border-color);
+}
+.sidebar-title { color: var(--py-yellow); font-size: 1.15rem; font-weight: 700; }
+.btn-close-sidebar {
+    background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);
+    padding: 5px 10px; border-radius: 6px; cursor: pointer; font-weight: 700;
+}
+.btn-close-sidebar:hover { background: var(--accent-red); border-color: var(--accent-red); }
+
+.teams-list { display: flex; flex-direction: column; gap: 9px; }
+.team-card {
+    background: var(--terminal-bg); border: 1px solid var(--border-color);
+    padding: 12px 14px; border-radius: 7px; display: flex; justify-content: space-between;
+    align-items: center; cursor: pointer; transition: 0.15s;
+}
+.team-card:hover { border-color: var(--py-blue); }
+.team-card.active { border: 2px solid var(--py-yellow); background: rgba(255, 212, 59, 0.1); }
+.team-card.tried { opacity: 0.45; border-color: var(--accent-red); cursor: not-allowed; }
+.score-pill {
+    background: var(--py-blue); color: #fff; padding: 3px 9px;
+    border-radius: 12px; font-size: 0.82rem; font-weight: 700;
+}
