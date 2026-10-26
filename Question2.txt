@@ -1,24 +1,12 @@
-Question 2. What will be the suitable output of the following code: 
+Question 02. Write the appropriate output of the following code:
 
-vault = {
-    "keys": {10, 20, 30},
-    "sub": {"auth": {1, 2}},
-}
+grades={"Math":85, "Physics":92}
 
-shadow = vault.copy()
+score=grades.update({"Chemistry":78}).get("Chemistry")
 
-result = vault["keys"].intersection_update({20, 30, 40})
+print(score)
 
-shadow["sub"]["auth"].discard(1)
-shadow["sub"] = {"auth": {99}}
-
-
-print("OUT 4:", result, sorted(shadow["keys"]), sorted(vault["sub"]["auth"]))
-
-A. OUT 4: {40,20,30} [10,20,30] [1,2]
-
-B. OUT 4: None [10,20,30] [99]
-
-C. OUT 4: None [10,20,30] [1,2]
-
-D. OUT 4: None [20,30,40] [99]
+A. 78
+B. {"Maths":85, "Physics":92, "Chemistry":78}
+C. None
+D. Attribute Error
