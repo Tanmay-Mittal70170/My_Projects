@@ -65,3 +65,11 @@ for i, team_name in enumerate(teams, start=1):
 print("\n" + "-" * 80)
 print("QUIZ COMPLETE!")
 
+"""
+In this code tanmay do kaam krne h :
+1. jab team ka question wrong ho then woh question next team pr passe ho jaye and points show krre negative 
+and all jo bhi h 
+2. jab question khatam ho toh ek dum se next question aa jaye for example pehla question khatam hua toh 
+enter krne par dusra question aaye , and baad me teams ke naame bhi daal denge aur acha banane ke liye 
+3... raaghav ko bhi question nikalne dena 
+"""
