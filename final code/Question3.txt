@@ -11,3 +11,5 @@ A. ['Apple'] and ['Banana']
 B. ['Apple'] and ['Apple', 'Banana']
 C. Error
 D. ['Apple', 'Banana'] and ['Apple', 'Banana']
+
+correct_answer=D

@@ -8,3 +8,5 @@ A. 0
 B. 2
 C. 3
 D. NameError: name 'i' is not defined
+
+correct_answer=D

@@ -10,3 +10,5 @@ A. 78
 B. {"Maths":85, "Physics":92, "Chemistry":78}
 C. None
 D. Attribute Error
+
+correct_answer=D
