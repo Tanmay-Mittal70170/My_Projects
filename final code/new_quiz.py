@@ -2,6 +2,12 @@ import tkinter as tk
 import turtle
 import customtkinter as ctk
 
+# =====================================================
+# Settings
+# =====================================================
+CORRECT_POINTS = 5         # points a team gets for a correct answer
+WRONG_POINTS = 1           # points a team loses for a wrong answer
+
 # ---------- Colors ----------
 BG = "#0f172a"
 CARD = "#1e293b"
@@ -34,13 +40,14 @@ else:
 # Reading questions from Question1.txt, Question2.txt, ...
 #
 # File format:
-#   line 1             -> the question
-#   lines until "A."   -> the code (optional)
-#   A. / B. / C. / D.  -> the four options
-#   correct_answer=A   -> the right option
+#   line 1              -> the question
+#   lines until "A."    -> the code (optional)
+#   A. / B. / C. / D.   -> the four options
+#   correct_answer=A    -> the right option
+#   explanation=...     -> why it is right (optional, can continue on the next lines)
 #
-# The program looks for Question1.txt, Question2.txt, Question3.txt ...
-# in the folder you run it from, and stops at the first missing number.
+# The program reads Question1.txt, Question2.txt, Question3.txt ... and stops at the
+# first missing number. NUMBER OF TEAMS = NUMBER OF QUESTION FILES.
 # =====================================================
 def trim_blank_lines(lines):
     """Remove empty lines at the start and end (keeps the spaces of other lines)."""
@@ -82,22 +89,32 @@ def parse_question(text, filename):
     found = []                                # option letters found so far
     answer_letter = ""
     current = ""                              # option we are reading right now
+    in_explanation = False
+    explanation_lines = []
 
     for line in lines:
-        clean = line.strip().replace(" ", "").lower()
+        stripped = line.strip()
+        clean = stripped.replace(" ", "").lower()
         next_letter = "ABCD"[len(found)] if len(found) < 4 else ""
         first = option_start(line, next_letter) if next_letter != "" else None
 
-        if clean.startswith("correct_answer="):          # correct_answer=A
+        if clean.startswith("correct_answer="):                  # correct_answer=A
             answer_letter = clean.split("=")[1].upper()
             current = ""
-        elif first is not None:                          # A. / B. / C. / D.
+            in_explanation = False
+        elif stripped.lower().startswith("explanation") and stripped[11:].lstrip()[:1] in ("=", ":"):
+            explanation_lines = [stripped[11:].lstrip()[1:].strip()]   # explanation=...
+            in_explanation = True
+            current = ""
+        elif in_explanation:                                     # more lines of the explanation
+            explanation_lines.append(line.rstrip())
+        elif first is not None:                                  # A. / B. / C. / D.
             current = next_letter
             found.append(next_letter)
             options[current].append(first)
-        elif len(found) == 0:                            # question and code part
+        elif len(found) == 0:                                    # question and code part
             question_lines.append(line)
-        elif current != "":                              # more lines of the same option
+        elif current != "":                                      # more lines of the same option
             options[current].append(line)
 
     if len(found) != 4:
@@ -107,7 +124,7 @@ def parse_question(text, filename):
             "(found: " + found_text + ")"
         )
     if answer_letter not in ("A", "B", "C", "D"):
-        raise ValueError(filename + ": add a line like correct_answer=A at the end")
+        raise ValueError(filename + ": add a line like correct_answer=A")
 
     question_lines = trim_blank_lines(question_lines)
     if len(question_lines) == 0:
@@ -131,6 +148,8 @@ def parse_question(text, filename):
         "code": code,
         "options": option_texts,
         "answer": option_texts["ABCD".index(answer_letter)],
+        "answer_letter": answer_letter,
+        "explanation": "\n".join(trim_blank_lines(explanation_lines)),
     }
 
 
@@ -245,19 +264,35 @@ result_label.pack(pady=5)
 
 # =====================================================
 # Quiz window (opens after a successful login)
+#
+# Rules:
+#   * number of teams = number of questions
+#   * question 1 goes to Team 1, question 2 to Team 2, ...
+#   * if a team clicks Pass, the same question goes to the next team
+#     (after the last team it continues with Team 1)
+#   * if a team answers, the question is over:
+#     right answer = +5 points, wrong answer = -1 point
+#   * if NO team answers, the correct answer and the explanation are shown
 # =====================================================
 def show_quiz_screen():
     quiz = ctk.CTkToplevel(Screen)
-    quiz.title("Quiz")
-    quiz.geometry("640x740")
-    quiz.minsize(640, 600)
-    quiz.maxsize(1500, 1000)
+    quiz.title("Python Quiz")
+    quiz.geometry("760x800")
+    quiz.minsize(700, 560)
     quiz.configure(fg_color=BG)
 
     Screen.withdraw()                                    # hide the login window
     quiz.protocol("WM_DELETE_WINDOW", Screen.destroy)    # closing the quiz closes the app
     quiz.lift()
     quiz.focus()
+
+    def maximize():
+        try:
+            quiz.state("zoomed")                         # fill the screen (works on Windows)
+        except Exception:
+            pass
+
+    quiz.after(200, maximize)
 
     # ----- Load the questions -----
     try:
@@ -280,11 +315,19 @@ def show_quiz_screen():
     if len(questions) == 0:
         ctk.CTkLabel(
             quiz_frame, text=error, font=("Segoe UI", 16),
-            text_color=RED, wraplength=480
+            text_color=RED, wraplength=520
         ).pack(expand=True)
         return
 
-    state = {"index": 0, "score": 0, "options": []}
+    teams = len(questions)                               # number of teams = number of questions
+
+    state = {
+        "index": 0,                 # which question we are on (0 = first)
+        "tried": 0,                 # how many teams already passed on this question
+        "scores": [0] * teams,
+        "finished": False,          # True when the question is over
+        "options": [],
+    }
 
     def pad(text):
         # Make every line the same length, so multi-line patterns keep their
@@ -293,58 +336,115 @@ def show_quiz_screen():
         width = max(len(line) for line in lines)
         return "\n".join(line.ljust(width) for line in lines)
 
-    # ----- Widgets (created once) -----
-    ctk.CTkLabel(
-        quiz_frame, text="Python Quiz", font=("Segoe UI", 24, "bold")
-    ).pack(pady=(20, 0))
-
-    progress_label = ctk.CTkLabel(
-        quiz_frame, text="", font=("Segoe UI", 13), text_color=MUTED
+    # ----- Top part: whose turn it is and the scores -----
+    turn_label = ctk.CTkLabel(
+        quiz_frame, text="", font=("Segoe UI", 26, "bold"), text_color=ACCENT
     )
-    progress_label.pack(pady=(0, 12))
+    turn_label.pack(pady=(18, 2))                        # "Team 2's turn"
+
+    scoreboard_label = ctk.CTkLabel(
+        quiz_frame, text="", font=("Segoe UI", 13), text_color=MUTED, wraplength=620
+    )
+    scoreboard_label.pack(pady=(0, 8))
+
+    # ----- Bottom part: Pass and Next buttons (packed before the middle part,
+    #       so they are always visible even if the window is small) -----
+    bottom_bar = ctk.CTkFrame(quiz_frame, fg_color="transparent")
+    bottom_bar.pack(side="bottom", pady=(6, 15))
+
+    pass_button = ctk.CTkButton(
+        bottom_bar, text="Pass", width=140, height=40,
+        fg_color=OPTION_BG, hover_color=OPTION_HOVER, text_color=TEXT,
+        text_color_disabled=MUTED,
+    )
+    pass_button.pack(side="left", padx=8)
+
+    next_button = ctk.CTkButton(
+        bottom_bar, text="Next", width=140, height=40,
+        fg_color=ACCENT, hover_color=ACCENT_HOVER, state="disabled",
+    )
+    next_button.pack(side="left", padx=8)
+
+    # ----- Middle part (scrolls if the question is tall) -----
+    scroll_area = ctk.CTkScrollableFrame(quiz_frame, fg_color="transparent")
+    scroll_area.pack(fill="both", expand=True, padx=10, pady=(0, 0))
+
+    question_number_label = ctk.CTkLabel(
+        scroll_area, text="", font=("Segoe UI", 22, "bold"),
+        text_color=ACCENT, anchor="w",
+    )
+    question_number_label.pack(pady=(0, 2), padx=20, fill="x")      # "Question 1"
 
     question_label = ctk.CTkLabel(
-        quiz_frame, text="", font=("Segoe UI", 16, "bold"), wraplength=520
+        scroll_area, text="", font=("Segoe UI", 16, "bold"),
+        wraplength=580, justify="left", anchor="w",
     )
-    question_label.pack(pady=(0, 10))
+    question_label.pack(pady=(0, 10), padx=20, fill="x")            # left aligned
 
     code_label = ctk.CTkLabel(
-        quiz_frame, text="", font=("Consolas", 13), text_color=TEXT,
+        scroll_area, text="", font=("Consolas", 13), text_color=TEXT,
         fg_color=BG, corner_radius=10, justify="left", anchor="w",
     )
 
-    options_frame = ctk.CTkFrame(quiz_frame, fg_color="transparent")
+    options_frame = ctk.CTkFrame(scroll_area, fg_color="transparent")
     options_frame.pack(pady=5)
 
     option_buttons = []
     for i in range(4):
+        cell = ctk.CTkFrame(options_frame, fg_color="transparent")
+        cell.grid(row=i // 2, column=i % 2, padx=6, pady=6, sticky="nsew")
+
+        # The letter is a separate label (not part of the button text), so the
+        # alignment of multi-line patterns inside the button is not disturbed
+        ctk.CTkLabel(
+            cell, text="ABCD"[i] + ".", width=32,
+            font=("Segoe UI", 20, "bold"), text_color=ACCENT,
+        ).pack(side="left", padx=(0, 4))
+
         btn = ctk.CTkButton(
-            options_frame, text="", width=240, height=44, corner_radius=10,
+            cell, text="", width=250, height=44, corner_radius=10,
             fg_color=OPTION_BG, hover_color=OPTION_HOVER,
             text_color=TEXT, text_color_disabled=TEXT,
             border_width=1, border_color=OPTION_HOVER,
             font=("Consolas", 13),
         )
-        btn.grid(row=i // 2, column=i % 2, padx=6, pady=6, sticky="nsew")
+        btn.pack(side="left")
         option_buttons.append(btn)
 
-    feedback_label = ctk.CTkLabel(quiz_frame, text="", font=("Segoe UI", 13))
-    feedback_label.pack(pady=6)
-
-    next_button = ctk.CTkButton(
-        quiz_frame, text="Next", width=140, height=38,
-        fg_color=ACCENT, hover_color=ACCENT_HOVER, state="disabled",
+    feedback_label = ctk.CTkLabel(
+        scroll_area, text="", font=("Segoe UI", 15, "bold"), wraplength=580
     )
-    next_button.pack(pady=(0, 15))
+    feedback_label.pack(pady=(8, 4))
 
-    # ----- Logic -----
+    explanation_label = ctk.CTkLabel(
+        scroll_area, text="", font=("Segoe UI", 14), text_color=TEXT,
+        wraplength=580, justify="left", anchor="w",
+    )
+    explanation_label.pack(pady=(0, 10), padx=20, fill="x")
+
+    # ----- Helpers -----
+    def current_team():
+        # Question 1 starts with Team 1, question 2 with Team 2, ... and then it
+        # goes on to the next teams (after the last team it comes back to Team 1)
+        return (state["index"] + state["tried"]) % teams
+
+    def update_scoreboard():
+        parts = []
+        for number in range(teams):
+            parts.append("Team " + str(number + 1) + ": " + str(state["scores"][number]))
+        scoreboard_label.configure(text="   |   ".join(parts))
+
+    def update_turn():
+        turn_label.configure(text="Team " + str(current_team() + 1) + "'s turn")
+
+    # ----- Game logic -----
     def show_question():
         q = questions[state["index"]]
         state["options"] = q["options"]
+        state["tried"] = 0
+        state["finished"] = False
 
-        progress_label.configure(
-            text="Question " + str(state["index"] + 1) + " of " + str(len(questions))
-        )
+        question_number_label.configure(text="Question " + str(state["index"] + 1))
         question_label.configure(text=q["question"])
 
         if q["code"] != "":
@@ -363,24 +463,83 @@ def show_quiz_screen():
             )
 
         feedback_label.configure(text="")
-        is_last = state["index"] == len(questions) - 1
-        next_button.configure(text="Finish" if is_last else "Next", state="disabled")
+        explanation_label.configure(text="")
+        pass_button.configure(state="normal")
+        next_button.configure(state="disabled")
 
-    def check_answer(choice):
-        correct = questions[state["index"]]["answer"]
+        update_scoreboard()
+        update_turn()
+
+    def finish_question(message, color, choice=None, status="Question finished"):
+        """The question is over: show the right answer, the message and the explanation."""
+        state["finished"] = True
+        q = questions[state["index"]]
+        correct = q["answer"]
+
         for btn, opt in zip(option_buttons, state["options"]):
             btn.configure(state="disabled")
             if opt == correct:
                 btn.configure(fg_color=GREEN, text_color_disabled=DARK_TEXT)   # correct answer
-            elif opt == choice:
+            elif choice is not None and opt == choice:
                 btn.configure(fg_color=RED, text_color_disabled=DARK_TEXT)     # wrong choice
 
-        if choice == correct:
-            state["score"] += 1
-            feedback_label.configure(text="Correct!", text_color=GREEN)
+        feedback_label.configure(text=message, text_color=color)
+
+        if q["explanation"] != "":
+            explanation_label.configure(text="Explanation:\n" + q["explanation"])
         else:
-            feedback_label.configure(text="Wrong answer", text_color=RED)
-        next_button.configure(state="normal")
+            explanation_label.configure(text="")
+
+        turn_label.configure(text=status)
+        pass_button.configure(state="disabled")
+        is_last = state["index"] == len(questions) - 1
+        next_button.configure(
+            text="Finish" if is_last else "Next", state="normal"
+        )
+        update_scoreboard()
+
+    def pass_turn():
+        """The current team clicked Pass, so the question goes to the next team."""
+        if state["finished"]:
+            return
+        team_number = current_team() + 1
+        state["tried"] += 1
+
+        if state["tried"] >= teams:
+            # every team had its chance and nobody answered: reveal the answer
+            letter = questions[state["index"]]["answer_letter"]
+            finish_question(
+                "No team answered. Correct answer: " + letter, ACCENT,
+                None, "No team answered",
+            )
+        else:
+            feedback_label.configure(
+                text="Team " + str(team_number) + " passed. Next team!",
+                text_color=MUTED,
+            )
+            update_turn()
+
+    def check_answer(choice):
+        """The current team clicked an option."""
+        if state["finished"]:
+            return
+        team = current_team()
+        q = questions[state["index"]]
+        status = "Team " + str(team + 1) + " answered"
+
+        if choice == q["answer"]:
+            state["scores"][team] += CORRECT_POINTS
+            finish_question(
+                "Correct! Team " + str(team + 1) + " gets +" + str(CORRECT_POINTS) + " points",
+                GREEN, choice, status,
+            )
+        else:
+            state["scores"][team] -= WRONG_POINTS
+            finish_question(
+                "Wrong answer! Team " + str(team + 1) + " loses " + str(WRONG_POINTS)
+                + " point. Correct answer: " + q["answer_letter"],
+                RED, choice, status,
+            )
 
     def next_question():
         state["index"] += 1
@@ -392,15 +551,37 @@ def show_quiz_screen():
     def show_result():
         for widget in quiz_frame.winfo_children():
             widget.destroy()
+
         ctk.CTkLabel(
             quiz_frame, text="Quiz Complete", font=("Segoe UI", 28, "bold")
-        ).pack(pady=(120, 10))
-        ctk.CTkLabel(
-            quiz_frame,
-            text="Your score: " + str(state["score"]) + " / " + str(len(questions)),
-            font=("Segoe UI", 20), text_color=ACCENT
-        ).pack(pady=10)
+        ).pack(pady=(50, 10))
 
+        best = max(state["scores"])
+        if best == 0 and min(state["scores"]) == 0:
+            winner_text = "Every team finished on 0 points"
+        else:
+            winners = []
+            for number in range(teams):
+                if state["scores"][number] == best:
+                    winners.append("Team " + str(number + 1))
+            if len(winners) == 1:
+                winner_text = "Winner: " + winners[0]
+            else:
+                winner_text = "Tie between " + ", ".join(winners)
+
+        ctk.CTkLabel(
+            quiz_frame, text=winner_text, font=("Segoe UI", 22, "bold"),
+            text_color=GREEN
+        ).pack(pady=(0, 20))
+
+        for number in range(teams):
+            ctk.CTkLabel(
+                quiz_frame,
+                text="Team " + str(number + 1) + ": " + str(state["scores"][number]),
+                font=("Segoe UI", 18), text_color=TEXT
+            ).pack(pady=3)
+
+    pass_button.configure(command=pass_turn)
     next_button.configure(command=next_question)
     show_question()
 
