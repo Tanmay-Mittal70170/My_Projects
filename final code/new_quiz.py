@@ -586,10 +586,29 @@ def show_quiz_screen():
     show_question()
 
 
+# ---------- Voice ----------
+def speak(text):
+    """Say the text out loud (Windows voice). It runs in the background ("&"), so the
+    window does not freeze. No extra import is needed: tkinter's built-in Tcl `exec`
+    command starts PowerShell, which uses the Windows speech engine."""
+    command = (
+        "Add-Type -AssemblyName System.Speech; "
+        "(New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak('" + text + "')"
+    )
+    try:
+        Screen.tk.call(
+            "exec", "powershell", "-NoProfile", "-WindowStyle", "Hidden",
+            "-Command", command, "&",
+        )
+    except Exception:
+        pass        # no voice available on this computer: just continue silently
+
+
 # ---------- Login logic ----------
 def login(event=None):
     if admin_entry.get() == "Python_Quiz" and password_entry.get() == "Python@123":
         result_label.configure(text="Login successful", text_color=GREEN)
+        speak("Welcome to Python Class Quiz")  # voice message after a successful login
         Screen.after(800, show_quiz_screen)   # wait 0.8 seconds, then open the quiz
     else:
         result_label.configure(text="Invalid name or password", text_color=RED)
