@@ -1,0 +1,23 @@
+Question 8: Write the Output of the Following Code:
+
+rate = 2
+
+def compute(x, multiplier=rate):
+    return x * multiplier
+
+rate = 10
+print(compute(5))
+
+A. 50
+B. 10
+C. 20
+D. None
+
+Correct_Answer: B
+
+Explaination: The Silly Mistake: Students assume rate is dynamically resolved when the 
+function compute(5) is executed (giving 5×10=50).
+
+The Reality: Default parameter expressions are evaluated at the moment the function 
+definition is executed. At definition time, rate was 2. Later changes to the global variable 
+rate do not update the already-bound default parameter value. Thus, 5×2=10.

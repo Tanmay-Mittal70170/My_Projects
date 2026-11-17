@@ -1,0 +1,16 @@
+Question 4: find the Output of the following code: 
+
+tup = (1, 0, True, False, 1, 0)
+
+print(tup.count(True), tup.index(False))
+
+A. 1 3   
+B. 3 1   
+C. 1 1  
+D. 3 3
+
+Correct Answer: B
+
+Explaination: In Python Boolean is consider the child of int data type as false = 0 and true = 1. and 
+when you check the methods index(True) will check for number of Trues and index(False) will check the count
+of False (0, False)

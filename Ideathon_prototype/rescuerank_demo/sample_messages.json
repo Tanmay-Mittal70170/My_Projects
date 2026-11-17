@@ -1,0 +1,50 @@
+[
+  {
+    "text": "URGENT! Water is up to our chest, 6 people stuck on the roof incl 2 children and an elderly woman. Please send a boat",
+    "channel": "sample", "sender_id": "s101", "lat": 28.6655, "lon": 77.2420, "minutes_ago": 55
+  },
+  {
+    "text": "Yamuna Bazaar mein chhat par fase hain, 5 log, bachche bhi hain, jaldi boat bhejo",
+    "channel": "sample", "sender_id": "s102", "lat": null, "lon": null, "minutes_ago": 40
+  },
+  {
+    "text": "Help!! hum fase hue hain, paani gale tak aa gaya, 6 log",
+    "channel": "sample", "sender_id": "s103", "lat": 28.6659, "lon": 77.2423, "minutes_ago": 25
+  },
+  {
+    "text": "Meri maa ko diabetes hai, insulin khatam ho gayi, bahut kamzor hain, medicine chahiye. 3 log hain",
+    "channel": "sample", "sender_id": "s104", "lat": 28.6086, "lon": 77.2950, "minutes_ago": 35
+  },
+  {
+    "text": "Pregnant wife ko labour pain ho raha hai, ambulance turant chahiye, 2 of us at Usmanpur",
+    "channel": "sample", "sender_id": "s105", "lat": null, "lon": null, "minutes_ago": 20
+  },
+  {
+    "text": "Kal se khana nahi mila, 8 log hain, 3 bachche. Chilla Village",
+    "channel": "sample", "sender_id": "s106", "lat": null, "lon": null, "minutes_ago": 90
+  },
+  {
+    "text": "No drinking water since morning, 12 people in the relief camp near Okhla Barrage",
+    "channel": "sample", "sender_id": "s107", "lat": 28.5555, "lon": 77.3107, "minutes_ago": 15
+  },
+  {
+    "text": "ओखला बैराज के पास पीने का पानी चाहिए, 12 लोग हैं",
+    "channel": "sample", "sender_id": "s108", "lat": null, "lon": null, "minutes_ago": 10
+  },
+  {
+    "text": "Help please",
+    "channel": "sample", "sender_id": "s109", "lat": null, "lon": null, "minutes_ago": 5
+  },
+  {
+    "text": "Congratulations! Free rescue lottery prize, click link http://bit.ly/xyz and forward this to 10 groups",
+    "channel": "sample", "sender_id": "s110", "lat": 28.6200, "lon": 77.3000, "minutes_ago": 8
+  },
+  {
+    "text": "Ghar mein paani bhar gaya, tent chahiye raat ke liye, 4 log hain, ek budhe dada bhi hain. Usmanpur",
+    "channel": "sample", "sender_id": "s111", "lat": null, "lon": null, "minutes_ago": 50
+  },
+  {
+    "text": "Sir please hurry, still stuck on the roof, nobody has come",
+    "channel": "sample", "sender_id": "s101", "lat": 28.6655, "lon": 77.2420, "minutes_ago": 5
+  }
+]

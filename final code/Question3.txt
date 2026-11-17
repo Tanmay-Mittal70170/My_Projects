@@ -1,0 +1,27 @@
+Question 3: Give the respective output of the following programe:
+
+x = 10
+
+if 5 < x < 20 == True:
+    print("Alpha")
+elif (5 < x < 20) == True:
+    print("Beta")
+else:
+    print("Gamma")
+
+A. Alpha
+
+B. Beta
+
+C. Gamma
+
+D. None
+
+Correct Answer: B
+
+Explaination:
+
+Python me comparison operators chain hote hain!
+Line 1: 5 < x < 20 == True ko Python internally aise todta hai:
+5 < x and  x < 20 and 20 == True
+Kyunki 20 == True False hota hai, isliye poora if condition fail (False) ho jata hai!

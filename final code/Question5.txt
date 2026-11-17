@@ -1,0 +1,14 @@
+Question 05: What will be the output of the following code:
+
+lst= [10,20,30]
+lst.insert(-1,lst.pop(0))
+print(lst)
+
+A. [20,30,10]
+B. [20,10,30]
+C. [10,20,30]
+D. [30,20,10]
+
+Correct Answer: B
+
+Explaination:first pop(0) will run then insert(-1,10) will run

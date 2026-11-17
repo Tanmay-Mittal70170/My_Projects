@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RescueRank</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+:root {
+  --paper: #eef2f4;
+  --panel: #ffffff;
+  --ink: #14232d;
+  --muted: #586a76;
+  --rule: #d3dce2;
+  --red: #c8372d;
+  --amber: #e0a000;
+  --teal: #0e8a8c;
+  --done: #8a98a2;
+  --action: #0b6e70;
+  --font: "Atkinson Hyperlegible", system-ui, "Segoe UI", "Nirmala UI", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: var(--font); color: var(--ink); background: var(--paper);
+  font-size: 15px; line-height: 1.4; display: flex; flex-direction: column;
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid #1b6fd1; outline-offset: 2px; }
+
+header {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 10px 18px; background: var(--ink); color: #fff; flex-wrap: wrap;
+}
+header h1 { margin: 0; font-size: 20px; letter-spacing: 0.2px; }
+header .sub { color: #aebdc7; font-size: 13px; margin-left: 10px; font-weight: 400; }
+.tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.status { color: #aebdc7; font-size: 13px; font-variant-numeric: tabular-nums; }
+.btn {
+  border: 1px solid #5d7381; background: transparent; color: #fff; padding: 6px 12px;
+  border-radius: 6px; cursor: pointer;
+}
+.btn:hover { background: #22394a; }
+.btn:disabled { opacity: .55; cursor: default; }
+#banner {
+  display: none; background: #fdecea; color: #7a1f18; padding: 8px 18px;
+  border-bottom: 1px solid #f0b9b3; font-size: 14px;
+}
+
+main {
+  flex: 1; min-height: 0; display: grid;
+  grid-template-columns: 340px minmax(0, 1fr) 390px;
+}
+.col { min-height: 0; overflow-y: auto; background: var(--panel); }
+#listCol { border-right: 1px solid var(--rule); }
+#detailCol { border-left: 1px solid var(--rule); }
+#mapCol { position: relative; background: #dfe7eb; overflow: hidden; }
+#map { position: absolute; inset: 0; }
+
+.list-head { padding: 12px 14px 8px; color: var(--muted); font-size: 13px; border-bottom: 1px solid var(--rule); }
+.empty { padding: 22px 16px; color: var(--muted); }
+.row {
+  display: grid; grid-template-columns: 58px 1fr; width: 100%; text-align: left;
+  border: 0; border-bottom: 1px solid var(--rule); background: var(--panel); padding: 0; cursor: pointer;
+}
+.row:hover { background: #f5f8f9; }
+.row.sel { background: #e8f1f4; box-shadow: inset 0 0 0 2px var(--ink); }
+.row .score {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 24px; font-variant-numeric: tabular-nums; color: #fff;
+}
+.row .score small { font-size: 11px; font-weight: 400; opacity: .9; }
+.row .score.red { background: var(--red); }
+.row .score.amber { background: var(--amber); color: #2b2100; }
+.row .score.teal { background: var(--teal); }
+.row .score.done { background: var(--done); }
+.row .body { padding: 9px 12px; min-width: 0; }
+.row .l1 { font-weight: 700; }
+.row .l2 { color: var(--muted); font-size: 13px; }
+.row.is-done .body { opacity: .65; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+.chip {
+  font-size: 12px; padding: 1px 7px; border-radius: 10px; border: 1px solid var(--rule);
+  background: #f3f6f8; color: var(--ink);
+}
+.chip.warn { background: #fff3d6; border-color: #ecc66a; }
+.chip.bad { background: #fdecea; border-color: #f0b9b3; color: #7a1f18; }
+
+.detail { padding: 16px; }
+.detail h2 { margin: 0; font-size: 22px; }
+.detail .meta { color: var(--muted); font-size: 13px; margin-top: 2px; }
+.detail h3 { margin: 18px 0 6px; font-size: 15px; }
+.big { display: flex; align-items: baseline; gap: 8px; margin-top: 12px; }
+.big .n { font-size: 44px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+.big .n.red { color: var(--red); } .big .n.amber { color: #a87700; } .big .n.teal { color: var(--teal); }
+.big .u { color: var(--muted); }
+.bar { display: grid; grid-template-columns: 112px 1fr 58px; gap: 8px; align-items: center; margin: 5px 0; font-size: 14px; }
+.bar .track { height: 10px; background: #e6ecef; border-radius: 5px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--ink); }
+.bar .v { text-align: right; font-variant-numeric: tabular-nums; }
+table.kv { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.kv td { padding: 4px 0; vertical-align: top; border-bottom: 1px solid #edf1f3; }
+table.kv td:first-child { color: var(--muted); width: 38%; }
+ul.plain { list-style: none; margin: 0; padding: 0; font-size: 14px; }
+ul.plain li { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; border-bottom: 1px solid #edf1f3; }
+ul.plain li .pts { font-variant-numeric: tabular-nums; font-weight: 700; }
+.pts.neg { color: var(--red); }
+.report { border-left: 3px solid var(--rule); padding: 4px 0 4px 10px; margin: 8px 0; font-size: 14px; }
+.report .who { color: var(--muted); font-size: 12px; }
+.report .txt { overflow-wrap: anywhere; }
+.team { background: #eef6f6; border: 1px solid #c4dede; border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+.callout { background: #fff3d6; border: 1px solid #ecc66a; border-radius: 8px; padding: 9px 12px; font-size: 14px; margin-top: 12px; }
+.callout.bad { background: #fdecea; border-color: #f0b9b3; color: #5e1a14; }
+.callout.ok { background: #e6f4ea; border-color: #b7dcc1; }
+.primary {
+  width: 100%; margin-top: 18px; padding: 12px 14px; border: 0; border-radius: 8px; cursor: pointer;
+  background: var(--action); color: #fff; font-weight: 700; font-size: 16px;
+}
+.primary:hover { background: #095a5c; }
+.primary:disabled { opacity: .6; cursor: default; }
+
+@media (max-width: 1000px) {
+  body { height: auto; display: block; }
+  html, body { height: auto; }
+  main { display: flex; flex-direction: column; }
+  #mapCol { order: 1; height: 46vh; min-height: 280px; flex: none; }
+  #listCol { order: 2; border-right: 0; max-height: none; overflow: visible; }
+  #detailCol { order: 3; border-left: 0; border-top: 1px solid var(--rule); overflow: visible; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>RescueRank<span class="sub">Flood-rescue triage</span></h1>
+  <div class="tools">
+    <span class="status" id="status">Connecting…</span>
+    <button class="btn" id="btnSamples">Load sample messages</button>
+    <button class="btn" id="btnReset">Reset</button>
+  </div>
+</header>
+<div id="banner" role="alert"></div>
+<main>
+  <section class="col" id="listCol" aria-label="Ranked requests">
+    <div class="list-head" id="listHead"></div>
+    <div id="list"></div>
+  </section>
+  <section id="mapCol" aria-label="Map"><div id="map"></div></section>
+  <section class="col" id="detailCol" aria-label="Request details"><div id="detail"></div></section>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function () {
+  "use strict";
+  var NEED = { rescue: "Rescue", medical: "Medical", food: "Food", water: "Water", shelter: "Shelter", unknown: "Unclear need" };
+  var COLOR = { red: "#c8372d", amber: "#e0a000", teal: "#0e8a8c", done: "#8a98a2" };
+  var state = { items: [], serverTime: 0, selected: null, notices: {}, fitted: false };
+  var markers = {};
+  var busy = false;
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s === null || s === undefined ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function tone(p) { return p >= 70 ? "red" : p >= 45 ? "amber" : "teal"; }
+  function toneOf(it) { return it.status === "completed" ? "done" : tone(it.priority); }
+  function fmtMin(m) {
+    if (m < 1) return "under 1 min";
+    if (m < 60) return Math.round(m) + " min";
+    var h = Math.floor(m / 60), r = Math.round(m % 60);
+    return h + " h " + (r < 10 ? "0" : "") + r + " min";
+  }
+  function agoText(at) { return fmtMin(Math.max(0, (state.serverTime - at) / 60)) + " ago"; }
+  function clock(ts) { return new Date(ts * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); }
+
+  // ---------- map ----------
+  var map = L.map("map", { zoomControl: true }).setView([28.63, 77.26], 11);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19, attribution: "&copy; OpenStreetMap contributors"
+  }).addTo(map);
+  setTimeout(function () { map.invalidateSize(); }, 200);
+  window.addEventListener("resize", function () { map.invalidateSize(); });
+
+  function displayPositions(items) {
+    // Requests that share one landmark would sit on top of each other; spread them slightly.
+    var groups = {}, out = {};
+    items.forEach(function (it) {
+      if (it.lat === null) return;
+      var k = it.lat.toFixed(5) + "," + it.lon.toFixed(5);
+      (groups[k] = groups[k] || []).push(it);
+    });
+    Object.keys(groups).forEach(function (k) {
+      var g = groups[k];
+      g.forEach(function (it, i) {
+        if (g.length === 1) { out[it.id] = [it.lat, it.lon]; return; }
+        var a = (2 * Math.PI * i) / g.length, d = 0.00028;
+        out[it.id] = [it.lat + d * Math.sin(a), it.lon + d * Math.cos(a) * 1.1];
+      });
+    });
+    return out;
+  }
+
+  function renderMap() {
+    var pos = displayPositions(state.items), seen = {}, pts = [];
+    state.items.forEach(function (it) {
+      if (!pos[it.id]) return;
+      seen[it.id] = true;
+      pts.push(pos[it.id]);
+      var c = COLOR[toneOf(it)];
+      var sel = it.id === state.selected;
+      var style = {
+        radius: sel ? 13 : 10, color: sel ? "#14232d" : "#ffffff", weight: sel ? 4 : 2,
+        fillColor: c, fillOpacity: it.status === "completed" ? 0.6 : 0.95,
+        dashArray: it.needs_review ? "3 3" : null
+      };
+      var m = markers[it.id];
+      if (!m) {
+        m = L.circleMarker(pos[it.id], style).addTo(map);
+        m.on("click", (function (id) { return function () { select(id, false); }; })(it.id));
+        markers[it.id] = m;
+      } else {
+        m.setLatLng(pos[it.id]); m.setStyle(style);
+      }
+      m.unbindTooltip();
+      m.bindTooltip(it.id + " · " + NEED[it.need] + " · " + it.priority);
+      if (sel) m.bringToFront();
+    });
+    Object.keys(markers).forEach(function (id) {
+      if (!seen[id]) { map.removeLayer(markers[id]); delete markers[id]; }
+    });
+    if (!state.fitted && pts.length) {
+      map.fitBounds(L.latLngBounds(pts).pad(0.25), { maxZoom: 14 });
+      state.fitted = true;
+    }
+  }
+
+  // ---------- list ----------
+  function renderList() {
+    var open = state.items.filter(function (i) { return i.status === "open"; }).length;
+    var done = state.items.length - open;
+    $("listHead").textContent = "Ranked by priority · " + open + " open" + (done ? ", " + done + " completed" : "");
+    if (!state.items.length) {
+      $("list").innerHTML = '<div class="empty">No requests yet. Load the sample messages, or send a message to the Telegram bot.</div>';
+      return;
+    }
+    var ae = document.activeElement;
+    var focusId = ae && ae.classList && ae.classList.contains("row") ? ae.getAttribute("data-id") : null;
+    $("list").innerHTML = state.items.map(function (it) {
+      var chips = "";
+      if (it.status === "completed") chips += '<span class="chip">Completed</span>';
+      if (it.vulnerable) chips += '<span class="chip warn">Vulnerable</span>';
+      if (it.urgent) chips += '<span class="chip warn">Urgent</span>';
+      if (it.needs_review) chips += '<span class="chip bad">Needs review</span>';
+      if (it.follow_up.length) chips += '<span class="chip">Needs follow-up</span>';
+      if (it.lat === null) chips += '<span class="chip">No location</span>';
+      if (it.report_count > 1) chips += '<span class="chip">' + it.report_count + " reports</span>";
+      var who = it.people ? it.people + (it.people === 1 ? " person" : " people") : "people unknown";
+      return '<button class="row' + (it.id === state.selected ? " sel" : "") + (it.status === "completed" ? " is-done" : "") +
+        '" data-id="' + esc(it.id) + '">' +
+        '<div class="score ' + toneOf(it) + '">' + it.priority + '<small>' + (it.rank ? "#" + it.rank : "done") + '</small></div>' +
+        '<div class="body"><div class="l1">' + esc(NEED[it.need]) + " · " + esc(who) + '</div>' +
+        '<div class="l2">' + esc(it.id) + " · " + esc(it.location_label) + " · waiting " + fmtMin(it.score.waiting_minutes) + '</div>' +
+        '<div class="chips">' + chips + '</div></div></button>';
+    }).join("");
+    if (focusId) {
+      var again = $("list").querySelector('[data-id="' + focusId + '"]');
+      if (again) again.focus();
+    }
+  }
+
+  // ---------- detail ----------
+  function bar(label, val, max) {
+    return '<div class="bar"><span>' + label + '</span><span class="track"><span class="fill" style="width:' +
+      Math.round((val / max) * 100) + '%;display:block"></span></span><span class="v">' + val + " / " + max + "</span></div>";
+  }
+  function renderDetail() {
+    var it = state.items.filter(function (x) { return x.id === state.selected; })[0];
+    if (!it) {
+      $("detail").innerHTML = '<div class="empty">Select a request from the list or the map to see how it was scored.</div>';
+      return;
+    }
+    var s = it.score, d = s.urgency_detail, t = tone(it.priority);
+    var h = '<div class="detail">';
+    h += "<h2>" + esc(NEED[it.need]) + " · " + esc(it.id) + "</h2>";
+    h += '<div class="meta">First reported ' + clock(it.first_reported_at) + " (" + agoText(it.first_reported_at) + ") · " +
+      it.report_count + " report" + (it.report_count > 1 ? "s" : "") + " from " + it.distinct_senders + " sender" + (it.distinct_senders > 1 ? "s" : "") + "</div>";
+    h += '<div class="big"><span class="n ' + t + '">' + it.priority + '</span><span class="u">priority score</span></div>';
+
+    h += "<h3>Score breakdown</h3>";
+    h += bar("Urgency", s.urgency, 50) + bar("Vulnerability", s.vulnerability, 30) + bar("Waiting time", s.waiting, 20);
+    h += '<div class="meta">Urgency = need base ' + d.need_base + " + urgent words " + d.urgent_words + " + life threat " + d.life_threat +
+      " (max 50). Waiting " + fmtMin(s.waiting_minutes) + " counted from the first report.</div>";
+
+    h += "<h3>Extracted fields</h3><table class='kv'>";
+    h += "<tr><td>Need</td><td>" + esc(NEED[it.need]) + (it.secondary_needs.length ? " (also: " + esc(it.secondary_needs.join(", ")) + ")" : "") + "</td></tr>";
+    h += "<tr><td>People</td><td>" + (it.people ? it.people : "Not stated") + "</td></tr>";
+    h += "<tr><td>Vulnerable</td><td>" + (it.vulnerable ? "Yes (" + esc(it.vulnerable_terms.join(", ")) + ")" : "No") + "</td></tr>";
+    h += "<tr><td>Urgent</td><td>" + (it.urgent ? "Yes (" + esc(it.urgent_terms.join(", ")) + ")" : "No") + "</td></tr>";
+    h += "<tr><td>Location</td><td>" + esc(it.location_label) + " · " + esc(it.location_source === "none" ? "unknown" : it.location_source) +
+      (it.lat !== null ? "<br>" + it.lat.toFixed(5) + ", " + it.lon.toFixed(5) : "") + "</td></tr></table>";
+
+    h += "<h3>Credibility: " + it.credibility.score + " / 100</h3><ul class='plain'>";
+    it.credibility.factors.forEach(function (f) {
+      h += "<li><span>" + esc(f.label) + '</span><span class="pts' + (f.points < 0 ? " neg" : "") + '">' + (f.points > 0 ? "+" : "") + f.points + "</span></li>";
+    });
+    h += "</ul>";
+    if (it.needs_review) h += '<div class="callout bad">Credibility is below 45. A person should check this request before a team is sent.</div>';
+    if (it.follow_up.length) h += '<div class="callout">Needs follow-up: ' + esc(it.follow_up.join(", ")) + ".</div>";
+
+    if (it.suggested_team) {
+      var tm = it.suggested_team;
+      h += "<h3>Suggested nearest team</h3><div class='team'><strong>" + esc(tm.name) + "</strong><br>" +
+        tm.distance_km + " km away · about " + tm.eta_min + " min</div>";
+    }
+
+    h += "<h3>Reports</h3>";
+    it.reports.forEach(function (r) {
+      h += '<div class="report"><div class="who">' + esc(r.channel) + " · sender " + esc(r.sender_id) + " · " + agoText(r.at) +
+        " · location: " + esc(r.loc_source) + '</div><div class="txt">' + (r.text ? esc(r.text) : "<em>(location pin only)</em>") + "</div></div>";
+    });
+
+    var notice = state.notices[it.id];
+    if (it.status === "completed") {
+      var n = it.notified || [];
+      var ok = n.filter(function (x) { return x.sent; }).length;
+      var msg = n.length ? ok + " of " + n.length + " Telegram sender(s) notified." +
+        n.filter(function (x) { return !x.sent; }).map(function (x) { return " " + esc(x.sender_id) + ": " + esc(x.error); }).join("")
+        : "No Telegram sender on this request, so nobody was messaged.";
+      h += '<div class="callout ' + (n.length && ok < n.length ? "bad" : "ok") + '">Marked complete. ' + msg + "</div>";
+    } else {
+      h += '<button class="primary" id="btnComplete" data-id="' + esc(it.id) + '">Mark complete and notify</button>';
+      if (notice) h += '<div class="callout bad">' + esc(notice) + "</div>";
+    }
+    h += "</div>";
+    $("detail").innerHTML = h;
+  }
+
+  function renderAll() { renderList(); renderMap(); renderDetail(); }
+
+  function select(id, pan) {
+    state.selected = id;
+    renderAll();
+    var it = state.items.filter(function (x) { return x.id === id; })[0];
+    if (pan && it && it.lat !== null) map.panTo(markers[id] ? markers[id].getLatLng() : [it.lat, it.lon]);
+  }
+
+  // ---------- data ----------
+  function banner(msg) {
+    var b = $("banner");
+    b.textContent = msg || "";
+    b.style.display = msg ? "block" : "none";
+  }
+  async function refresh() {
+    if (busy) return;
+    busy = true;
+    try {
+      var r = await fetch("/requests", { cache: "no-store" });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      var data = await r.json();
+      state.items = data.requests;
+      state.serverTime = data.server_time;
+      if (state.selected && !state.items.some(function (x) { return x.id === state.selected; })) state.selected = null;
+      if (!state.selected && state.items.length) state.selected = state.items[0].id;
+      banner("");
+      var open = state.items.filter(function (i) { return i.status === "open"; }).length;
+      $("status").textContent = open + " open · updated " + new Date().toLocaleTimeString();
+      renderAll();
+    } catch (e) {
+      banner("Cannot reach the RescueRank server. Showing the last data received; retrying every 5 seconds.");
+      $("status").textContent = "Offline";
+    } finally {
+      busy = false;
+    }
+  }
+  async function post(url) {
+    var r = await fetch(url, { method: "POST" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return r.json();
+  }
+
+  // ---------- events ----------
+  $("list").addEventListener("click", function (e) {
+    var row = e.target.closest(".row");
+    if (row) select(row.getAttribute("data-id"), true);
+  });
+  $("detail").addEventListener("click", async function (e) {
+    var btn = e.target.closest("#btnComplete");
+    if (!btn) return;
+    var id = btn.getAttribute("data-id");
+    btn.disabled = true;
+    btn.textContent = "Marking complete…";
+    try {
+      var res = await post("/requests/" + encodeURIComponent(id) + "/complete");
+      delete state.notices[id];
+      if (res.notified && res.notified.length && res.notified.every(function (x) { return !x.sent; })) {
+        state.notices[id] = "Marked complete, but no Telegram message was delivered.";
+      }
+    } catch (err) {
+      state.notices[id] = "Could not mark complete (" + err.message + "). Try again.";
+    }
+    await refresh();
+    renderDetail();
+  });
+  $("btnSamples").addEventListener("click", async function () {
+    this.disabled = true;
+    try { await post("/load-samples"); state.fitted = false; } catch (err) { banner("Could not load samples: " + err.message); }
+    this.disabled = false;
+    await refresh();
+  });
+  $("btnReset").addEventListener("click", async function () {
+    if (!window.confirm("Remove all requests?")) return;
+    try { await post("/reset"); state.selected = null; state.fitted = false; state.notices = {}; } catch (err) { banner("Could not reset: " + err.message); }
+    await refresh();
+  });
+
+  refresh();
+  setInterval(refresh, 5000);
+})();
+</script>
+</body>
+</html>

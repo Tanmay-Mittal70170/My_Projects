@@ -1,0 +1,17 @@
+Queestion 6: What will be the suitable Output of the Following Programme:
+
+text= "banana"
+result=text.strip("ab")
+print(result)
+
+A. "banana"
+B. "nan"
+C. "nana"
+D. Argument Error
+
+Correct Answer: B
+
+Explaination: strip(ab) means doing striping on the basises of a and b, means when you run text.strip("ab")
+the output will be nan.
+
+

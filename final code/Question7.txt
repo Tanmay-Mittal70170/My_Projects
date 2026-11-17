@@ -1,0 +1,18 @@
+Question 7: What will be the Output of the following Programe:
+
+def make_square(n):
+    res = n * n
+    
+print(make_square(4) == 16)
+
+A. True
+B. False
+C. 16
+D. TypeError
+
+Correct_Answer: B
+
+Explaination:The Silly Mistake: Students focus on res = 4 * 4 = 16, overlook the missing 
+return statement, and expect 16 == 16 → True.
+The Reality: Any Python function without an explicit return statement returns None by default. 
+The expression becomes None == 16, which evaluates to False.
